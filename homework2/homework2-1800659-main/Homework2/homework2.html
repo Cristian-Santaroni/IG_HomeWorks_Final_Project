@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <button id="startAnimation" style="background-color:black;color:rgb(187, 204, 38);width:150px; height:40px;" >Click To Animate!</button>
+    <button id="Motion" style="background-color:black;color:rgb(187, 204, 38);width:150px; height:40px;" >Active Motion Blur!</button>
+
+
+<div>
+radius 0.01<input id="radiusSlider" type="range"
+ min="0.01" max="100" step="0.1" value="20" />
+ 10</div></br>
+
+<div>
+theta -90<input id="thetaSlider" type="range"
+ min="-90" max="90" step="5" value="0" />
+ 90</div></br>
+
+<div>
+phi -90<input id="phiSlider" type="range"
+ min="-90" max="90" step="5" value="0" />
+</div><br>
+<div>
+fov 10<input id="fovSlider" type="range"
+ min="10" max="200" step="5" value="120" />
+ 120</div></br>
+<canvas id="gl-canvas" width="512" height="512"> </canvas>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+  #version 300 es
+
+in vec4 aPosition;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 uLightPosition;
+in vec2 aTexCoord;
+in vec4 aColor;
+out vec4 vColor;
+out vec2 vTexCoord;
+out vec3 L;
+out vec3 V; /* view vector in texture-space coordinates */
+uniform vec4 uNormal;
+uniform mat3 uNormalMatrix;
+uniform vec3 uObjTangent; /* tangent vector in object coordinates */
+in vec4 catColor;
+
+void main()
+{
+    vColor = catColor;
+    gl_Position = projectionMatrix * modelViewMatrix * aPosition;
+    vTexCoord = aTexCoord;
+    
+    vec3 eyePosition = (modelViewMatrix*aPosition).xyz;
+    vec3 eyeLightPos = (uLightPosition).xyz;
+
+    vec3 N = normalize(uNormalMatrix*uNormal.xyz);
+    vec3 T  = normalize(uNormalMatrix*uObjTangent);
+    vec3 B = cross(N, T);
+    /* light vector in texture space */
+
+    L.x = dot(T, eyeLightPos-eyePosition);
+    L.y = dot(B, eyeLightPos-eyePosition);
+    L.z = dot(N, eyeLightPos-eyePosition);
+
+    L = normalize(L);
+
+    /* view vector in texture space */
+
+    V.x = dot(T, -eyePosition);
+    V.y = dot(B, -eyePosition);
+    V.z = dot(N, -eyePosition);
+
+    V = normalize(V);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+  #version 300 es
+  
+  precision mediump float;
+  
+  out vec4 fColor;
+  
+  uniform mat4 uModelViewMatrix;
+  in vec4 vColor;
+  in vec2 vTexCoord;
+  in vec3 L;
+  uniform sampler2D uTextureMap; // bump texture 
+  uniform sampler2D uTextureMap0; // color texture for carpet
+  uniform sampler2D uTextureMap1; // color texture for CAT-FACE
+  uniform sampler2D uTextureMap2; // color texture for fur
+  uniform sampler2D uTextureMap3; // bump texture for fur 
+  uniform float useTexture;
+  in vec3 V;
+  uniform vec4 uDiffuseProduct;
+  void main()
+  {
+      // here im checking which texture im using
+      if( useTexture == 0.0)
+      {
+          vec4 N = texture(uTextureMap3, vTexCoord);
+          vec3 NN =  normalize(2.0*N.xyz-1.0);
+          vec3 LL = normalize(L);
+          float Kd = max(dot(NN, LL), 0.0);
+          //vec4 ambient = vec4(0.4, 0.2, 0.2, 0.0);
+          vec4 textureColor = vColor + texture(uTextureMap2,vTexCoord);
+          fColor = vec4(textureColor.rgb*Kd, 1.0);
+          //fColor = vec4(0.7, 0.7, 0.7, 1.0);
+  
+      }
+      else if(useTexture == 1.0)
+      {
+          vec4 N = texture(uTextureMap, vTexCoord);
+          vec3 NN =  normalize(2.0*N.xyz-1.0);
+          vec3 LL = normalize(L);
+          float Kd = max(dot(NN, LL), 0.0);
+          vec4 ambient = vec4(0.4, 0.2, 0.2, 0.0);
+          vec4 textureColor = texture(uTextureMap0,vTexCoord);
+          fColor = ambient+ vec4(textureColor.rgb*Kd, 1.0);
+      }
+      else if(useTexture == 2.0){
+          fColor = texture(uTextureMap1, vTexCoord);
+      }
+      else if(useTexture == 3.0){
+          fColor = vec4(0.6, 0.5, 0.5, 1.0);
+      }
+
+  }
+  </script>
+<script id="vertex-shader-mb" type="x-shader/x-vertex">
+  #version 300 es
+  precision highp float;
+  in vec4 aPosition;
+  in vec2 aTexCoord;
+
+  out vec2 vTexCoord;
+
+  void main(){
+      gl_Position = aPosition;
+      vTexCoord = aTexCoord;
+  }
+    </script>
+
+
+
+
+
+<script id="fragment-shader-mb" type="x-shader/x-fragment">
+    #version 300 es
+
+    precision mediump float;
+    
+    in vec2 vTexCoord;
+    uniform bool mbActivation;
+    
+    out vec4 fColor;
+    
+    uniform sampler2D newImage;
+    uniform sampler2D pastScreen0;
+    uniform sampler2D pastScreen1;
+    uniform sampler2D pastScreen2;
+    void main() {
+
+        if (!mbActivation) {
+            fColor = texture(newImage, vTexCoord);
+            
+        } else {
+            vec4 oldPixel1 = texture(pastScreen0, vTexCoord);
+            vec4 oldPixel2 = texture(pastScreen1, vTexCoord);
+            vec4 oldPixel3 = texture(pastScreen2, vTexCoord);
+    
+            vec4 blurredPixel = (oldPixel1 + oldPixel2 + oldPixel3) / 3.0;
+            fColor = mix(blurredPixel, texture(newImage, vTexCoord), 0.5);
+        }
+    }
+    
+</script>
+
+<script src="../Common/initShaders.js"></script>
+<script src="../Common/MVnew.js"></script>
+<script src="homework2.js"></script>
+<img id = "bump-carpet" src="carpet1.png" hidden></img>
+<img id = "carpet" src="carpet1.jpg" hidden></img>
+<img id = "cat-face" src="cat-face-close.jpg" hidden></img>
+<img id ="bump-fur" src = "fur1.png" hidden></img>
+<img id = "fur" src="fur1.jpg" hidden></img>
+</body>
+</html>
