@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" style="width: 100%;height: 100%">
+<head>
+    <script src="https://cdn.babylonjs.com/ammo.js" type="text/javascript"></script>
+    <style>
+        @font-face {
+            font-family: 'black_ops_2regular';
+            src: url('Assets/black_ops_2_font-webfont.woff2') format('woff2'),
+                url('Assets/black_ops_2_font-webfont.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'black_ops_2regular';
+        }
+
+        #fps {
+            position: absolute;
+            background-color: black;
+            border: 2px solid red;
+            text-align: center;
+            font-size: 16px;
+            color: white;
+            top: 15px;
+            right: 10px;
+            width: 60px;
+            height: 20px;
+        }
+
+        #ammo {
+            position: absolute;
+            background-color: black;
+            border: 2px solid red;
+            text-align: center;
+            font-size: 16px;
+            color: white;
+            bottom: 15px;
+            padding: .1%;
+            right: 10px;
+            width: fit-content;
+            height: fit-content;
+        }
+
+        #loadingScreen {
+            
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 24px;
+        }
+
+        #menu {
+            background-image: url("Assets/maxresdefault.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #333;
+            padding: 20px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+           
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #menu #logo {
+            color: rgb(221, 105, 13);
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        #menu #logo .settingsHeading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 0;
+        }
+
+        #menu #center {
+            justify-content: flex-end;
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: -webkit-fill-available;
+            padding-bottom: 5%;
+        }
+        #menu .spacer {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: row;
+            
+        }
+        #MainButtons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            width: 500px; /* Adjust the width as per your requirements */
+        }
+
+        #MainButtons .MSButton {
+            width: 150px;
+            background-color: #e4590e;
+            border: none;
+            color: #333;
+            padding: 10px 20px;
+            font-size: 10px;
+            font-weight: bold;
+            font-family: 'black_ops_2regular';
+            cursor: pointer;
+            transition: width 0.5s ease-in-out, color 3s linear, background-color 0.5s ease-in-out, margin-right 0.5s ease-in-out;
+            border-radius: 10px;
+        }
+
+        #MainButtons .MSButton:hover {
+            width: 180px;
+            background-color: #ffffff;
+            margin-right: 30px;
+        }
+
+        #menu .titleCommand {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #menu .keys {
+            display: inline-block;
+            width: 70px;
+            font-size: x-small;
+            width: fit-content;
+        }
+        
+        #commandsStart {
+            flex-direction: column;
+            display: flex;
+            width: 100%;
+            align-items: flex-start;
+        }
+        #commandsSettings {
+                flex-direction: column;
+    display: flex;
+    width: 100%;
+    align-items: start;
+    align-content: end;
+    flex-wrap: wrap-reverse;
+        }
+        #menu .Key {
+            font-size: xx-small;
+            display: inline-block;
+        }
+
+        .columnMenu {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+        }
+
+        .columnMenu span {
+            margin-bottom: 20px;
+        }
+
+        #gameBackMenu {
+            color: white;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        #runData {
+            position: absolute;
+            background-color: black;
+            border: 2px solid red;
+            text-align: center;
+            font-size: 16px;
+            color: white;
+            bottom: 15px;
+            padding: .1%;
+            left: 10px;
+            width: fit-content;
+            height: fit-content;
+        }
+
+        #crosshair {
+            display: flex;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-size: 12%;
+            background-image: url("Assets/crosshair.png");
+            background-repeat: no-repeat;
+            position: absolute;
+            background-position: center
+
+        }
+        #sniperScope {
+           
+            display: flex;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-image: url("Assets/scope-34891.png");
+            background-repeat: no-repeat;
+            position: absolute;
+            background-position: center
+
+        }
+
+        #luckyBox {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            top: 40%;
+            text-align: center;
+            color: white;
+            font-size: xx-large;
+        }
+
+        #ammobox {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            top: 40%;
+            text-align: center;
+            color: white;
+            font-size: xx-large;
+        }
+
+        #settings {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #333;
+            padding: 20px;
+            color: #fff;
+            font-family: 'black_ops_2regular';
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+           
+        }
+
+        .columnsSettings {
+            position: relative;
+            display: flex;
+            width: 33%;
+            height: 100%;
+            align-items: center;
+            flex-direction: column;
+            padding: 3%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #settingsTitle {
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            height: 10%;
+            width: 100%;
+            display: flex;
+            font-size:130%;
+            color: rgb(221, 105, 13);
+        }
+
+        .menuEntry {
+
+            display: flex;
+            width: 100%;
+            height: fit-content;
+            flex-direction: column;
+            align-items: center;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+
+
+        .topEntry {
+            justify-content: center;
+
+            display: flex;
+            width: 100%;
+            height: 50%;
+            font-size: auto;
+            padding: 2%;
+            align-items: center;
+        }
+
+
+        .bottomEntry>input {
+            margin: 3%;
+        }
+        .bottomEntry {
+            justify-content: center;
+
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 50%;
+            font-size: auto;
+            padding: 2%;
+            align-items: center;
+        }
+
+        .tooltiptext {
+            visibility: hidden;
+            width: 150px;
+            background-color: black;
+            color: #f44506;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            
+            /* Position the tooltip */
+            position: absolute;
+            z-index: 1;
+            top: 100%;
+            left: 50%;
+            margin-left: -60px;
+        }
+
+        #menuFooter {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: fit-content;
+            align-items: center;
+            justify-content: space-evenly;
+        }
+        .tooltip {
+            display:inline-block;
+            text-align:left;
+            padding: 4%;
+            border-radius: 10px;
+        }
+
+        .tooltip h3 {margin:12px 0;}
+
+        .tooltip .bottom {
+            min-width:200px;
+            /*max-width:400px;*/
+            left:50%;
+            transform:translate(-50%, 0%);
+            padding:1%;
+            color:#000000;
+            background-color:#dd690d;
+            font-weight:normal;
+            font-size:10%;
+            border-radius:8px;
+            position:absolute;
+            z-index:99999999;
+            box-sizing:border-box;
+            box-shadow:0 1px 8px rgba(0,0,0,0.5);
+            display:none;
+        }
+
+        .tooltip:hover .bottom {
+            display:block;
+        }
+
+
+        .tooltip .bottom img {
+            width:400px;
+        }
+
+        .tooltip .bottom i {
+            position:absolute;
+            bottom:100%;
+            left:50%;
+            margin-left:-12px;
+            width:24px;
+            height:12px;
+            overflow:hidden;
+        }
+
+        .tooltip .bottom i::after {
+            content:'';
+            position:absolute;
+            width:12px;
+            height:12px;
+            left:50%;
+            transform:translate(-50%,50%) rotate(45deg);
+            background-color:#EEEEEE;
+            box-shadow:0 1px 8px rgba(0,0,0,0.5);
+        }   
+
+
+        .footerEntry {
+            width: 33%;
+            display: flex;
+            padding: 5%;
+            align-items: center;
+        }
+
+        .hoverTooltip:hover .tooltiptext {
+            visibility: visible;
+        }
+        .lds-spinner {
+        color: official;
+        display: inline-block;
+        position: relative;
+        width: 80px;
+        height: 80px;
+        }
+        .lds-spinner div {
+        transform-origin: 40px 40px;
+        animation: lds-spinner 1.2s linear infinite;
+        }
+        .lds-spinner div:after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 3px;
+        left: 37px;
+        width: 6px;
+        height: 18px;
+        border-radius: 20%;
+        background: #fff;
+        }
+        .lds-spinner div:nth-child(1) {
+        transform: rotate(0deg);
+        animation-delay: -1.1s;
+        }
+        .lds-spinner div:nth-child(2) {
+        transform: rotate(30deg);
+        animation-delay: -1s;
+        }
+        .lds-spinner div:nth-child(3) {
+        transform: rotate(60deg);
+        animation-delay: -0.9s;
+        }
+        .lds-spinner div:nth-child(4) {
+        transform: rotate(90deg);
+        animation-delay: -0.8s;
+        }
+        .lds-spinner div:nth-child(5) {
+        transform: rotate(120deg);
+        animation-delay: -0.7s;
+        }
+        .lds-spinner div:nth-child(6) {
+        transform: rotate(150deg);
+        animation-delay: -0.6s;
+        }
+        .lds-spinner div:nth-child(7) {
+        transform: rotate(180deg);
+        animation-delay: -0.5s;
+        }
+        .lds-spinner div:nth-child(8) {
+        transform: rotate(210deg);
+        animation-delay: -0.4s;
+        }
+        .lds-spinner div:nth-child(9) {
+        transform: rotate(240deg);
+        animation-delay: -0.3s;
+        }
+        .lds-spinner div:nth-child(10) {
+        transform: rotate(270deg);
+        animation-delay: -0.2s;
+        }
+        .lds-spinner div:nth-child(11) {
+        transform: rotate(300deg);
+        animation-delay: -0.1s;
+        }
+        .lds-spinner div:nth-child(12) {
+        transform: rotate(330deg);
+        animation-delay: 0s;
+        }
+
+        #whitePoint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            transform: translate(-50%, -50%);
+        }
+
+        .slider {
+            margin-top: 10px;
+        width: 300px;
+        margin: 20px;
+        }
+        
+
+        @keyframes lds-spinner {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+        }
+
+        /* Styling for the sensitivity slider */
+#sensitivityRange::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #e4590e calc((var(--sensitivity-value) - 800) / 9200 * 100%), #837168 calc((var(--sensitivity-value) - 800) / 9200 * 100%), #17100d 100%);
+    height: 8px;
+    border-radius: 4px;
+}
+#sensitivityRange::-webkit-slider-thumb {
+    background-color: grey;
+    width: 16px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    -webkit-appearance: none;
+    transform: translateY(-4px); /* Move the thumb 4 pixels up */
+}
+
+/* Styling for the volume slider */
+#volumeRange::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #e4590e calc((var(--sensitivity-value))), #837168 calc((var(--sensitivity-value) - 800) / 9200 * 100%), #17100d 100%);
+    height: 8px;
+    border-radius: 4px;
+}
+#volumeRange::-webkit-slider-thumb {
+    background-color: grey;
+    width: 16px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    -webkit-appearance: none;
+    transform: translateY(-4px); /* Move the thumb 4 pixels up */
+
+}
+
+
+
+
+
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <title>The Last Survivor</title>
+    <link rel="shortcut icon" href="zombie_icon.ico">
+<script defer src="bundle.js"></script></head>
+<body style="width: 100%;height: 100%">
+    <div id="menu">
+        <div id="logo" class="spacer">
+            The Last Survivor
+        </div>
+        <div id="center">
+            <div id="MainButtons" class="spacer" >
+                <div class="spacer" style="padding: 4%;">
+                    <input id="startBTN" class="MSButton" type="button" value="START">
+                </div>
+                <div class="spacer" style="padding: 4%;"> 
+                    <input id="settingsBTN" class="MSButton" type="button" value="SETTINGS">
+                </div>
+            </div>
+            <div id="commandsStart" >
+                <h4 class="titleCommand" style="color: rgb(221,105,13);">Commands:</h4>
+                <div><span class="keys">W A S D    -</span><span class="Key">   directional movements</span></div>
+                <div><span class="keys">SHIFT    -</span><span class="Key">   run</span></div>
+                <div><span class="keys">R   -</span><span class="Key">   Reload</span></div>
+                <div><span class="keys">F   -</span><span class="Key">   Interact</span></div>
+                <div><span class="keys">T   -</span><span class="Key">   Toggle Light (Only in night mode)</span></div>
+                <div><span class="keys">MOUSE    -</span><span class="Key">   move camera</span></div>
+                <div><span class="keys">LEFT CLICK    -</span><span class="Key">   shoot</span></div>
+                <div><span class="keys">RIGHT CLICK    -</span><span class="Key">   aim</span></div>
+                <div><span class="keys">ESC     -</span><span class="Key">   pause</span></div> 
+            </div>
+        </div>
+    </div>
+    <div id="settings" style="display: none;">
+        <div class="columnsSettings">
+        </div>
+        <div class="columnsSettings">       
+            <div id="settingsTitle">
+                Settings
+            </div>
+            <div class="menuEntry">
+                <div class="topEntry">Difficulty</div>
+                <div class="bottomEntry">
+                    <div class="tooltip">
+                        <input id="easyBtn" class="MSButton" type="button" value="EASY">
+                        <div class="bottom">
+                            <p>Almost no weapon recoil, weak enemies.</p>
+                        </div>
+                    </div>
+                    <div class="tooltip">
+                        <input id="normalBtn" class="MSButton" type="button" value="MEDIUM">
+                        <div class="bottom">
+                            <p>Recoil slightly increased, stronger enemies.</p>
+                        </div>
+                    </div>
+                    <div class="tooltip">
+                        <input id="hardBtn" class="MSButton" type="button" value="INSANE">
+                        <div class="bottom">
+                            <p>Watch your back!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="menuEntry">
+                <div class="topEntry">Time</div>
+                <div class="bottomEntry">
+                    <input id="dayBtn" class="MSButton" type="button" value="DAY">
+                    <input id="nightBtn" class="MSButton" type="button" value="NIGHT">
+                </div>
+            </div>
+            <div class="menuEntry">
+                <div class="topEntry">Motion</div>
+                <div class="topEntry">Blur</div>
+                <div class="bottomEntry"> 
+                    <input id="motionblurBtn" class="MSButton" type="button" value="DISABLE MOTION BLUR">
+                </div>
+            </div>
+            <div class="menuEntry">
+                <div class="topEntry">Sensitivity</div>
+                <div class="bottomEntry"> 
+                    HIGH<input type="range" id="sensitivityRange" min="800" max="10000" step="1" value="2000">LOW
+                </div>
+            </div>
+            <div class="menuEntry">
+                <div class="topEntry">Volume</div>
+                <div class="bottomEntry"> 
+                    0%<input type="range" id="volumeRange" min="0" max="100" step="1">100%
+                </div>
+            </div>
+            <div id="menuFooter">
+                <div class="topEntry">
+                    <input id="saveBtn" class="MSButton" type="button" value="SAVE">
+                </div>
+                <div class="topEntry">
+                    <input id="resetBtn" class="MSButton" type="button" value="RESET">
+                </div>
+                <div class="topEntry">
+                    <input id="exitBtn" class="MSButton" type="button" value="EXIT">
+                </div>     
+            </div>
+        </div>
+        <div class="columnsSettings">
+
+        </div>
+    </div>
+    
+    <div id="fps" style="display: none; font-family: Arial, Helvetica, sans-serif;">0</div>
+    <div id="ammo" style="display: none; font-family: Arial, Helvetica, sans-serif;"">ammo</div>
+    <div id="runData" style="display: none; font-family: Arial, Helvetica, sans-serif;"">Round<br> Zombie Count</div>
+    <div id="crosshair" style="display: none;"></div>
+    <div id="sniperScope" style="display: none;"></div>
+    <div id="luckyBox" style="display: none; font-family: Arial, Helvetica, sans-serif;"">Press F to open the crate</div>
+    <div id="ammobox" style="display: none; font-family: Arial, Helvetica, sans-serif;"">Obtained 10 ammo</div>
+    <div id="lifeBar" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 20px; background-color: #ccc;">
+        <div id="lifeProgress" style="height: 100%; width: 100%; background-color: green;"></div>
+      </div>
+      
+     <!-- <div class="slider">
+        <input type="range" id="rotationSlider" min="-5.14" max="5.14" value="1.57" step="0.01">
+     </div >
+     <div class="slider">
+        <input type="range" id="positionSlider" min="-5.14" max="5.14" value="1.57" step="0.01">
+      </div> -->
+      <!-- <div class="slider">
+        <input type="range" id="positionYSlider" min="-5.14" max="5.14" value="1.57" step="0.01">
+      </div>  --> 
+    <!-- <div id="whitePoint"></div> -->
+    <canvas id="renderCanvas" style="width: 100%;height: 100%"></canvas>
+    <div id="loadingScreen" >
+        <h2>Loading</h2>
+        <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      </div>
+    <div class="columnMenu" id="pauseGame">
+        <span>PAUSE</span>
+        <span>Click to continue</span>
+        <a href="./" id="gameBackMenu">Back to the Menu</a>
+    </div>
+    <div class="columnMenu" id="endMenu">
+        <span style="color: red;">!!! YOU DIED !!!</span>
+        <span id="rounds"></span>
+        <a href="./" id="gameBackMenu">Back to the Menu</a>
+    </div>
+        
+    <script src="main.js" type="module"></script>
+    
+</body>
+</html>
